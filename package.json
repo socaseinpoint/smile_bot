@@ -1,0 +1,23 @@
+{
+  "name": "smile-detection-app",
+  "version": "1.0.0",
+  "description": "A web application that detects smiles and displays emojis in real-time",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . --listen 8000"
+  },
+  "keywords": [
+    "face-detection",
+    "smile-detection",
+    "mediapipe",
+    "computer-vision",
+    "web-app",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
