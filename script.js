@@ -8,12 +8,23 @@ class SmileDetectionApp {
         this.stopBtn = document.getElementById('stop-btn');
         this.status = document.getElementById('status');
         
+        // Statistics elements
+        this.smileCountEl = document.getElementById('smile-count');
+        this.sessionTimeEl = document.getElementById('session-time');
+        this.cooldownIndicator = document.getElementById('cooldown-indicator');
+        this.cooldownProgress = document.getElementById('cooldown-progress');
+        this.cooldownText = document.getElementById('cooldown-text');
+        
         this.camera = null;
         this.faceMesh = null;
         this.faceDetection = null;
         this.isRunning = false;
         this.lastSmileTime = 0;
         this.smileThreshold = 0.7;
+        this.cooldownDuration = 3000; // 3 секунды
+        this.smileCount = 0;
+        this.sessionStartTime = null;
+        this.sessionTimer = null;
         
         this.init();
     }
@@ -91,6 +102,9 @@ class SmileDetectionApp {
             this.stopBtn.disabled = false;
             this.updateStatus('Camera active - Smile for the camera! 😊');
             
+            // Start session tracking
+            this.startSession();
+            
         } catch (error) {
             console.error('Error accessing camera:', error);
             this.updateStatus('Error: Could not access camera. Please check permissions.');
@@ -113,6 +127,9 @@ class SmileDetectionApp {
         this.stopBtn.disabled = true;
         this.updateStatus('Camera stopped');
         this.clearCanvas();
+        
+        // Stop session tracking
+        this.stopSession();
     }
     
     onResults(results) {
@@ -163,12 +180,17 @@ class SmileDetectionApp {
     onSmileDetected(landmarks) {
         const now = Date.now();
         
-        // Throttle smile detection to avoid spam
-        if (now - this.lastSmileTime < 1000) {
+        // Check cooldown (3 seconds)
+        if (now - this.lastSmileTime < this.cooldownDuration) {
             return;
         }
         
         this.lastSmileTime = now;
+        this.smileCount++;
+        
+        // Update statistics
+        this.updateSmileCount();
+        this.startCooldown();
         
         // Add glow effect to video
         this.video.classList.add('smile-detected');
@@ -179,7 +201,7 @@ class SmileDetectionApp {
         // Draw emoji at face position
         this.drawEmoji(landmarks);
         
-        this.updateStatus('Smile detected! 😄');
+        this.updateStatus(`Smile detected! 😄 (${this.smileCount} total)`);
     }
     
     drawEmoji(landmarks) {
@@ -258,6 +280,70 @@ class SmileDetectionApp {
     
     updateStatus(message) {
         this.status.textContent = message;
+    }
+    
+    // Statistics and session management
+    startSession() {
+        this.sessionStartTime = Date.now();
+        this.smileCount = 0;
+        this.updateSmileCount();
+        this.updateSessionTime();
+        
+        // Start session timer
+        this.sessionTimer = setInterval(() => {
+            this.updateSessionTime();
+        }, 1000);
+    }
+    
+    stopSession() {
+        if (this.sessionTimer) {
+            clearInterval(this.sessionTimer);
+            this.sessionTimer = null;
+        }
+        this.sessionStartTime = null;
+    }
+    
+    updateSmileCount() {
+        this.smileCountEl.textContent = this.smileCount;
+    }
+    
+    updateSessionTime() {
+        if (!this.sessionStartTime) return;
+        
+        const elapsed = Date.now() - this.sessionStartTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        this.sessionTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    startCooldown() {
+        // Reset cooldown indicator
+        this.cooldownProgress.classList.remove('active');
+        this.cooldownText.classList.remove('ready');
+        this.cooldownText.classList.add('countdown');
+        
+        // Start cooldown animation
+        setTimeout(() => {
+            this.cooldownProgress.classList.add('active');
+        }, 10);
+        
+        // Update cooldown text countdown
+        let remainingTime = 3;
+        this.cooldownText.textContent = remainingTime + 's';
+        
+        const countdownInterval = setInterval(() => {
+            remainingTime--;
+            if (remainingTime > 0) {
+                this.cooldownText.textContent = remainingTime + 's';
+            } else {
+                this.cooldownText.textContent = 'Готов!';
+                this.cooldownText.classList.remove('countdown');
+                this.cooldownText.classList.add('ready');
+                this.cooldownProgress.classList.remove('active');
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
     }
 }
 

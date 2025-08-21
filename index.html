@@ -3,17 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smile Detection App</title>
+    <title>Super Jump - Smile Detection</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>😊 Smile Detection App</h1>
+        <h1>🚀 Super Jump</h1>
+        <p class="subtitle">Smile Detection & Statistics</p>
         <div class="video-container">
             <video id="video" autoplay muted playsinline></video>
             <canvas id="canvas"></canvas>
             <div id="emoji-overlay"></div>
         </div>
+        
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-number" id="smile-count">0</div>
+                <div class="stat-label">Улыбок обнаружено</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="session-time">00:00</div>
+                <div class="stat-label">Время сессии</div>
+            </div>
+            <div class="stat-item">
+                <div class="cooldown-indicator" id="cooldown-indicator">
+                    <div class="cooldown-circle">
+                        <div class="cooldown-progress" id="cooldown-progress"></div>
+                        <div class="cooldown-text" id="cooldown-text">Готов!</div>
+                    </div>
+                </div>
+                <div class="stat-label">Кулдаун</div>
+            </div>
+        </div>
+        
         <div class="controls">
             <button id="start-btn">Start Camera</button>
             <button id="stop-btn" disabled>Stop Camera</button>
